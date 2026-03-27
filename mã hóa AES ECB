@@ -55,6 +55,13 @@ def to_state(block):
 def from_state(state):
     return [state[r][c] for c in range(4) for r in range(4)]
 
+def print_state(state):
+    for r in range(4):
+        for c in range(4):
+            print(f"{state[r][c]:02x}", end=" ")
+        print()
+    print()
+
 # ================= AES OPS =================
 def sub_bytes(state):
     for r in range(4):
@@ -77,6 +84,13 @@ def mix_columns(s):
         s[1][c]=a[0]^xtime(a[1])^(xtime(a[2])^a[2])^a[3]
         s[2][c]=a[0]^a[1]^xtime(a[2])^(xtime(a[3])^a[3])
         s[3][c]=(xtime(a[0])^a[0])^a[1]^a[2]^xtime(a[3])
+
+
+# 02 03 01 01 
+# 01 02 03 01 
+# 01 01 02 03 
+# 03 01 01 02
+
 
 def add_round_key(state,w,round):
     for c in range(4):
@@ -105,7 +119,9 @@ def encrypt_block(block, w):
 # ================= ECB =================
 def pad(data):
     pad_len = 16 - (len(data) % 16)
-    return data + [pad_len]*pad_len
+    if pad_len == 16:
+        return data
+    return data + [0]*pad_len
 
 def split_blocks(data):
     return [data[i:i+16] for i in range(0, len(data), 16)]
@@ -150,3 +166,9 @@ cipher = aes_ecb_encrypt(plaintext_bytes, key)
 
 print("Cipher (hex):")
 print(bytes_to_hex(cipher))
+
+print("Cipher (matrix):")
+blocks = split_blocks(cipher)
+for block in blocks:
+    state = to_state(block)
+    print_state(state)
